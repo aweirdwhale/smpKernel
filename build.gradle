@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'xyz.aweirdwhale'
+version '2.0'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'xyz.aweirdwhale.Main'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.10.2'
+
+}
+
+
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+application {
+    mainModule = 'xyz.aweirdwhale'
+    mainClass = 'xyz.aweirdwhale.Main'
+}
+
+dependencies {
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    implementation("org.json:json:20240303")
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
