@@ -29,7 +29,7 @@ public class Uninstall {
 
     public static void modCleaning() throws IOException {
         String gameDir = getGameDir();
-        deleteFolder(gameDir+"/mods");
+        deleteFolder(gameDir + File.separator + "mods");
     }
 
     public static void deleteFolder(String path) throws IOException {
@@ -39,7 +39,7 @@ public class Uninstall {
             deleteRecursively(folder.toPath());
             System.out.println("Le dossier " + folder.toPath() + " a été supprimé avec succès.");
         } else {
-            System.out.println("Le dossier " + folder.toPath() + " n'existe pas endore ou a déjà été supprimé.");
+            System.out.println("Le dossier " + folder.toPath() + " n'existe pas encore ou a déjà été supprimé.");
         }
     }
 
@@ -57,5 +57,4 @@ public class Uninstall {
     public static String getGameDir() {
         return SetUpDirs.getGameDirectory();
     }
-
 }

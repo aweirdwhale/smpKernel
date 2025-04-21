@@ -8,24 +8,42 @@ import static xyz.aweirdwhale.Launcher.setUp;
 import static xyz.aweirdwhale.login.Login.login;
 
 public class Main {
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+    public static void main(String[] args) {
         /*
         args[0] = username
-        args[1] = maxRam
-        args[2] = minRam
+        args[1] = password
+        args[2] = maxRam
+        args[3] = minRam
         */
-//        GESTION DU LOGIN EN RUST
 
-//        String hashed = Hasher.hash(args[1]);
-//        int connexion = login(args[0], hashed);
-//
-//        if (connexion == 200) {
-//            setUp(args[0], args[2], args[3]);
-//        } else {
-//            System.out.println("⤫ Ré-essaie, si tu as oublié tes identifiants, ping moi sur discord");
-//        }
+        if (args.length < 4) {
+            System.err.println("Usage: java -jar app.jar <username> <password> <maxRam> <minRam>");
+            return;
+        }
 
-        // Appeler launcher.setUp avec Username, maxRam, minRam
-        setUp(args[0], args[1], args[2]);
+        String username = args[0];
+        String password = args[1];
+        String maxRam = args[2];
+        String minRam = args[3];
+
+        try {
+            // Hash the password
+            String hashedPassword = Hasher.hash(password);
+
+            // Attempt login
+            int responseCode = login(username, hashedPassword);
+
+            if (responseCode == 200) {
+                System.out.println("[OK] Login successful! Setting up the game...");
+                setUp(username, maxRam, minRam);
+            } else {
+                System.err.println("[Error] Login failed! Please check your credentials.");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("[Error] Failed to hash the password: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("[Error] An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

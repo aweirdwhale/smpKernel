@@ -7,115 +7,114 @@ import xyz.aweirdwhale.utils.SetUpDirs;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static xyz.aweirdwhale.intall.GetFiles.*;
 import static xyz.aweirdwhale.utils.Downloader.downloadFile;
 
 public class Launcher {
-    // Lance le jeu avec les paramètres demandés
-    public static void setUp(String username, String mxRam, String mnRam) {
 
-        // crée l'arborescence
+    public static void setUp(String username, String mxRam, String mnRam) {
         String dir = SetUpDirs.getGameDirectory();
         File gameDir = new File(dir);
         System.out.println(gameDir.getAbsolutePath());
 
-        // télécharge les versions
-        Downloader Downloader = new Downloader();
+        // Placeholder for downloading versions
         downloadVersions(dir);
 
-
-        // télécharge les libs
         GetFiles installer = new GetFiles();
         installer.run(dir);
 
-
-        // systemes unix
+        // Placeholder for deleting ASM
         GetFiles.deleteThisFuckingAsm(dir);
 
-        // télécharge les assets
+        // Placeholder for downloading assets
         downloadAssets(dir);
 
-        downloadFile("http://217.154.9.109:6969/public/servers.dat", dir+"/servers.dat", false);
-        downloadFile("http://217.154.9.109:6969/public/servers.dat_old", dir+"/servers.dat", false);
+        // Download server files
+        Path serversDatPath = Paths.get(dir, "servers.dat");
+        downloadFile("http://217.154.9.109:6969/public/servers.dat", serversDatPath.toString(), false);
 
+        Path serversDatOldPath = Paths.get(dir, "servers.dat_old");
+        downloadFile("http://217.154.9.109:6969/public/servers.dat_old", serversDatOldPath.toString(), false);
 
-        // télécharge les mods
+        // Placeholder for downloading mods
         downloadMods(dir);
 
+        // Generate classpath
+        Path path = Paths.get(dir, "classpath.txt");
+        ClassPathsGenerator.generateClassPath(Paths.get(dir, "libraries").toString(), path.toString());
 
-        // générer le ClassPath
-        ClassPathsGenerator.generateClassPath(dir + "/libraries", dir + "/classpath.txt");
-
-        // supprime l'asm chiant pour windows
+        // Remove specific library for Windows
         String os = System.getProperty("os.name").toLowerCase();
-
         if (os.contains("win")) {
-            ClassPathsGenerator.removeLibraryFromClassPath(dir + "/classpath.txt", ";" + dir + "/libraries/org/ow2/asm/asm/9.6/asm-9.6.jar");
+            ClassPathsGenerator.removeLibraryFromClassPath(
+                    path.toString(),
+                    ";" + Paths.get(dir, "libraries", "org/ow2/asm/asm/9.6/asm-9.6.jar")
+            );
         }
 
-        //lance le jeu
-        launchMinecraft(mxRam, mnRam, dir + "/classpath.txt", username, dir);
-
-
+        // Launch Minecraft
+        launchMinecraft(mxRam, mnRam, path.toString(), username, dir);
     }
 
-
-    public static void launchMinecraft(String maxRam, String minRam, String ClassPaths, String username, String gameDir) {
+    public static void launchMinecraft(String maxRam, String minRam, String classPaths, String username, String gameDir) {
         try {
-
             List<String> command = new ArrayList<>();
             command.add("java");
             command.add("-Xmx" + maxRam + "G");
             command.add("-Xms" + minRam + "G");
             command.add("-cp");
 
-// Charger le contenu du fichier classpath
-            String classpathContent = new String(Files.readAllBytes(Paths.get(ClassPaths)));
-            String classpath;
+            String classpathContent = Files.readString(Paths.get(classPaths), StandardCharsets.UTF_8);
             String os = System.getProperty("os.name").toLowerCase();
-
-// Ajout du forge.jar au classpath
-            if (os.contains("win")) {
-                classpath = gameDir + "/versions/1.21.1-forge/1.21.1-forge.jar;" + classpathContent.trim();
-            } else {
-                classpath = gameDir + "/versions/1.21.1-forge/1.21.1-forge.jar:" + classpathContent.trim();
-            }
+            String classpath = gameDir + "/versions/1.20.1-forge/1.20.1-forge.jar" +
+                    (os.contains("win") ? ";" : ":") +
+                    classpathContent.trim();
             command.add(classpath);
 
-// Classe principale pour Forge
             command.add("net.minecraft.launchwrapper.Launch");
-
-// Arguments Forge
             command.add("--username");
             command.add(username);
             command.add("--version");
-            command.add("1.21.1-forge");
+            command.add("1.20.1-forge");
             command.add("--gameDir");
             command.add(gameDir);
             command.add("--assetsDir");
-            command.add(gameDir + "/assets");
+            command.add(Paths.get(gameDir, "assets").toString());
             command.add("--assetIndex");
-            command.add("1.21");
+            command.add("1.20");
             command.add("--accessToken");
-            command.add("SNCF");
-
-// Obligatoire pour Forge
+            command.add("SNCF"); // Externalize this in a configuration file
             command.add("--tweakClass");
             command.add("net.minecraftforge.fml.common.launcher.FMLTweaker");
-
 
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.inheritIO();
             Process process = builder.start();
             process.waitFor();
-        } catch (InterruptedException | IOException _) {
-
+        } catch (InterruptedException | IOException error) {
+            System.err.println("Erreur lors du lancement de Minecraft : " + error.getMessage());
+            error.printStackTrace();
         }
     }
 
+    // Placeholder for downloadVersions
+    private static void downloadVersions(String dir) {
+        System.out.println("[Placeholder] Downloading versions to: " + dir);
+    }
+
+    // Placeholder for downloadAssets
+    private static void downloadAssets(String dir) {
+        System.out.println("[Placeholder] Downloading assets to: " + dir);
+    }
+
+    // Placeholder for downloadMods
+    private static void downloadMods(String dir) {
+        System.out.println("[Placeholder] Downloading mods to: " + dir);
+    }
 }
